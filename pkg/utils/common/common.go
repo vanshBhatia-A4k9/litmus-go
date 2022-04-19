@@ -104,7 +104,7 @@ func GetIterations(duration, interval int) int {
 	return math.Maximum(iterations, 1)
 }
 
-//FilterBasedOnPercentage return the slice of list based on the the provided percentage
+// FilterBasedOnPercentage return the slice of list based on the the provided percentage
 func FilterBasedOnPercentage(percentage int, list []string) []string {
 
 	var finalList []string
@@ -178,7 +178,7 @@ func GetStatusMessage(defaultCheck bool, defaultMsg, probeStatus string) string 
 	return "Probes: " + probeStatus
 }
 
-//GetRandomSequence will gives a random value for sequence
+// GetRandomSequence will gives a random value for sequence
 func GetRandomSequence(sequence string) string {
 	if strings.ToLower(sequence) == "random" {
 		rand.Seed(time.Now().UnixNano())
@@ -189,7 +189,7 @@ func GetRandomSequence(sequence string) string {
 	return sequence
 }
 
-//ValidateRange validates the given range of numbers
+// ValidateRange validates the given range of numbers
 func ValidateRange(a string) string {
 	var lb, ub int
 	intervals := strings.Split(a, "-")
@@ -211,4 +211,12 @@ func ValidateRange(a string) string {
 func getRandomValue(a, b int) int {
 	rand.Seed(time.Now().Unix())
 	return (a + rand.Intn(b-a+1))
+}
+
+// GetAbsoluteIntegerValue returns the absolute value of an integer
+func GetAbsoluteIntegerValue(a int) int {
+	if a < 0 {
+		a = -a
+	}
+	return a
 }

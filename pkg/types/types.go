@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/litmuschaos/litmus-go/pkg/utils/common"
 	"os"
 	"strconv"
 
@@ -107,7 +108,7 @@ type AppDetails struct {
 //InitialiseChaosVariables initialise all the global variables
 func InitialiseChaosVariables(chaosDetails *ChaosDetails) {
 	appDetails := AppDetails{}
-	appDetails.AnnotationCheck = TypeCheckBool(Getenv("ANNOTATION_CHECK", "false"), false)
+	appDetails.AnnotationCheck = typeCheckBool(Getenv("ANNOTATION_CHECK", "false"), false)
 	appDetails.AnnotationKey = Getenv("ANNOTATION_KEY", "litmuschaos.io/chaos")
 	appDetails.AnnotationValue = "true"
 	appDetails.Kind = Getenv("APP_KIND", "")
@@ -116,16 +117,16 @@ func InitialiseChaosVariables(chaosDetails *ChaosDetails) {
 
 	chaosDetails.ChaosNamespace = Getenv("CHAOS_NAMESPACE", "")
 	chaosDetails.ChaosPodName = Getenv("POD_NAME", "")
-	chaosDetails.Randomness = TypeCheckBool(Getenv("RANDOMNESS", "false"), false)
-	chaosDetails.ChaosDuration = TypeCheckInt(Getenv("TOTAL_CHAOS_DURATION", "60"), 60)
+	chaosDetails.Randomness = typeCheckBool(Getenv("RANDOMNESS", "false"), false)
+	chaosDetails.ChaosDuration = typeCheckInt(Getenv("TOTAL_CHAOS_DURATION", "60"), 60)
 	chaosDetails.ChaosUID = clientTypes.UID(Getenv("CHAOS_UID", ""))
 	chaosDetails.EngineName = Getenv("CHAOSENGINE", "")
 	chaosDetails.ExperimentName = Getenv("EXPERIMENT_NAME", "")
 	chaosDetails.InstanceID = Getenv("INSTANCE_ID", "")
-	chaosDetails.Timeout = TypeCheckInt(Getenv("STATUS_CHECK_TIMEOUT", "180"), 180)
-	chaosDetails.Delay = TypeCheckInt(Getenv("STATUS_CHECK_DELAY", "2"), 2)
+	chaosDetails.Timeout = typeCheckInt(Getenv("STATUS_CHECK_TIMEOUT", "180"), 180)
+	chaosDetails.Delay = typeCheckInt(Getenv("STATUS_CHECK_DELAY", "2"), 2)
 	chaosDetails.AppDetail = appDetails
-	chaosDetails.DefaultAppHealthCheck = TypeCheckBool(Getenv("DEFAULT_APP_HEALTH_CHECK", "true"), true)
+	chaosDetails.DefaultAppHealthCheck = typeCheckBool(Getenv("DEFAULT_APP_HEALTH_CHECK", "true"), true)
 	chaosDetails.JobCleanupPolicy = Getenv("JOB_CLEANUP_POLICY", "retain")
 	chaosDetails.ProbeImagePullPolicy = Getenv("LIB_IMAGE_PULL_POLICY", "Always")
 	chaosDetails.ParentsResources = []string{}
@@ -187,7 +188,9 @@ func Getenv(key string, defaultValue string) string {
 	return value
 }
 
-func TypeCheckBool(key string, defaultValue bool) bool {
+// typeCheckBool converts given key value to the bool primitive
+func typeCheckBool(key string, defaultValue bool) bool {
+	// strconv.ParseBool() returns 'false' from empty string
 	value, err := strconv.ParseBool(key)
 	if err != nil {
 		value = defaultValue
@@ -195,11 +198,14 @@ func TypeCheckBool(key string, defaultValue bool) bool {
 	return value
 }
 
-func TypeCheckInt(key string, defaultValue int) int {
+// typeCheckInt converts given key value to the int primitive
+func typeCheckInt(key string, defaultValue int) int {
+	// Atoi will throw error for floating points, empty strings & non-numeric strings
 	value, err := strconv.Atoi(key)
 	if err != nil {
 		value = defaultValue
 	}
-	return value
+	// Avoids negative values for time
+	return common.GetAbsoluteIntegerValue(value)
 
 }
