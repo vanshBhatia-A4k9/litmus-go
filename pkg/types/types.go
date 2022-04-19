@@ -107,7 +107,7 @@ type AppDetails struct {
 //InitialiseChaosVariables initialise all the global variables
 func InitialiseChaosVariables(chaosDetails *ChaosDetails) {
 	appDetails := AppDetails{}
-	appDetails.AnnotationCheck, _ = strconv.ParseBool(Getenv("ANNOTATION_CHECK", "false"))
+	appDetails.AnnotationCheck = TypeCheckBool(Getenv("ANNOTATION_CHECK", "false"), false)
 	appDetails.AnnotationKey = Getenv("ANNOTATION_KEY", "litmuschaos.io/chaos")
 	appDetails.AnnotationValue = "true"
 	appDetails.Kind = Getenv("APP_KIND", "")
@@ -116,16 +116,16 @@ func InitialiseChaosVariables(chaosDetails *ChaosDetails) {
 
 	chaosDetails.ChaosNamespace = Getenv("CHAOS_NAMESPACE", "")
 	chaosDetails.ChaosPodName = Getenv("POD_NAME", "")
-	chaosDetails.Randomness, _ = strconv.ParseBool(Getenv("RANDOMNESS", ""))
-	chaosDetails.ChaosDuration, _ = strconv.Atoi(Getenv("TOTAL_CHAOS_DURATION", ""))
+	chaosDetails.Randomness = TypeCheckBool(Getenv("RANDOMNESS", "false"), false)
+	chaosDetails.ChaosDuration = TypeCheckInt(Getenv("TOTAL_CHAOS_DURATION", "60"), 60)
 	chaosDetails.ChaosUID = clientTypes.UID(Getenv("CHAOS_UID", ""))
 	chaosDetails.EngineName = Getenv("CHAOSENGINE", "")
 	chaosDetails.ExperimentName = Getenv("EXPERIMENT_NAME", "")
 	chaosDetails.InstanceID = Getenv("INSTANCE_ID", "")
-	chaosDetails.Timeout, _ = strconv.Atoi(Getenv("STATUS_CHECK_TIMEOUT", "180"))
-	chaosDetails.Delay, _ = strconv.Atoi(Getenv("STATUS_CHECK_DELAY", "2"))
+	chaosDetails.Timeout = TypeCheckInt(Getenv("STATUS_CHECK_TIMEOUT", "180"), 180)
+	chaosDetails.Delay = TypeCheckInt(Getenv("STATUS_CHECK_DELAY", "2"), 2)
 	chaosDetails.AppDetail = appDetails
-	chaosDetails.DefaultAppHealthCheck, _ = strconv.ParseBool(Getenv("DEFAULT_APP_HEALTH_CHECK", "true"))
+	chaosDetails.DefaultAppHealthCheck = TypeCheckBool(Getenv("DEFAULT_APP_HEALTH_CHECK", "true"), true)
 	chaosDetails.JobCleanupPolicy = Getenv("JOB_CLEANUP_POLICY", "retain")
 	chaosDetails.ProbeImagePullPolicy = Getenv("LIB_IMAGE_PULL_POLICY", "Always")
 	chaosDetails.ParentsResources = []string{}
@@ -185,4 +185,21 @@ func Getenv(key string, defaultValue string) string {
 		value = defaultValue
 	}
 	return value
+}
+
+func TypeCheckBool(key string, defaultValue bool) bool {
+	value, err := strconv.ParseBool(key)
+	if err != nil {
+		value = defaultValue
+	}
+	return value
+}
+
+func TypeCheckInt(key string, defaultValue int) int {
+	value, err := strconv.Atoi(key)
+	if err != nil {
+		value = defaultValue
+	}
+	return value
+
 }
